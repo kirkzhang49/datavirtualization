@@ -1,0 +1,1 @@
+d3.csv('gdp_by_state.csv',(data)=>console.log(data))
