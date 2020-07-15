@@ -92,8 +92,8 @@ var x = d3.scaleLinear()
     .rangeRound([600, 860]);
 
 var color = d3.scaleThreshold()
-    .domain(d3.range(0, 10))
-    .range(d3.schemeBlues[9]);
+    .domain(d3.range(0, 8))
+    .range(d3.schemeBlues[8]);
 
 var g = svg.append("g")
     .attr("class", "key")
