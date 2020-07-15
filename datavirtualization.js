@@ -130,10 +130,10 @@ g.call(d3.axisBottom(x)
 
 var promises = [
   d3.json("https://d3js.org/us-10m.v1.json"),
-  d3.tsv("https://github.com/kirkzhang49/datavirtualization/blob/master/us_map.tsv", function(d) {
+  d3.tsv("https://raw.githubusercontent.com/kirkzhang49/datavirtualization/master/us_map.tsv", function(d) {
     stateNames.set(d.id, d.name)
   }),
-  d3.tsv("map.tsv", function(d) { 
+  d3.tsv("https://raw.githubusercontent.com/kirkzhang49/datavirtualization/master/map.tsv", function(d) { 
     console.log("d in map", d);
     unemployment.set(d.name, +d.value); 
   })
