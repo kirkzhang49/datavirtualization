@@ -3,6 +3,8 @@
     const gdpData = await d3.csv('https://raw.githubusercontent.com/kirkzhang49/datavirtualization/master/gdp_by_state.csv');
     const UnitedStateIncome = incomeData[0];
     const UnitedStateGdb = gdpData[0];
+    const population = await d3.csv("https://raw.githubusercontent.com/kirkzhang49/datavirtualization/master/population.csv");
+    const names = await d3.json('https://s3-us-west-2.amazonaws.com/vida-public/geo/us.json');
     //1997-2015
     const phase = [1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015];
     function generateIncomePhase(data, gdpData) {
@@ -18,7 +20,6 @@
         return result;
     }
     const USPhase = generateIncomePhase(UnitedStateIncome, UnitedStateGdb);
-    console.log(USPhase);
 
     function generateBarGraph(data,value,color,xx,yy,texts,labelx,labely) {
         var svg = d3.select("svg"),
@@ -79,184 +80,105 @@
     // d3.selectAll(`rect.income`).remove();
     // d3.select('#income-txt').remove();
     function generateUSMap() {
-        d3.csv("population.csv", function(err, data) {
+   var svg = d3.select("svg"),
+    width = +svg.attr("width"),
+    height = +svg.attr("height");
 
-  var config = {"color1":"#d3e5ff","color2":"#08306B","stateDataColumn":"state_or_territory","valueDataColumn":"population_estimate_for_july_1_2013_number"}
-  
-  var WIDTH = 800, HEIGHT = 500;
-  
-  var COLOR_COUNTS = 9;
-  
-  var SCALE = 0.7;
-  
-  function Interpolate(start, end, steps, count) {
-      var s = start,
-          e = end,
-          final = s + (((e - s) / steps) * count);
-      return Math.floor(final);
-  }
-  
-  function Color(_r, _g, _b) {
-      var r, g, b;
-      var setColors = function(_r, _g, _b) {
-          r = _r;
-          g = _g;
-          b = _b;
-      };
-  
-      setColors(_r, _g, _b);
-      this.getColors = function() {
-          var colors = {
-              r: r,
-              g: g,
-              b: b
-          };
-          return colors;
-      };
-  }
-  
-  function hexToRgb(hex) {
-      var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-      return result ? {
-          r: parseInt(result[1], 16),
-          g: parseInt(result[2], 16),
-          b: parseInt(result[3], 16)
-      } : null;
-  }
-  
-  function valueFormat(d) {
-    if (d > 1000000000) {
-      return Math.round(d / 1000000000 * 10) / 10 + "B";
-    } else if (d > 1000000) {
-      return Math.round(d / 1000000 * 10) / 10 + "M";
-    } else if (d > 1000) {
-      return Math.round(d / 1000 * 10) / 10 + "K";
-    } else {
+var unemployment = d3.map();
+var stateNames = d3.map();
+
+var path = d3.geoPath();
+
+var x = d3.scaleLinear()
+    .domain([1, 10])
+    .rangeRound([600, 860]);
+
+var color = d3.scaleThreshold()
+    .domain(d3.range(0, 10))
+    .range(d3.schemeBlues[9]);
+
+var g = svg.append("g")
+    .attr("class", "key")
+    .attr("transform", "translate(0,40)");
+
+g.selectAll("rect")
+  .data(color.range().map(function(d) {
+      d = color.invertExtent(d);
+      if (d[0] == null) d[0] = x.domain()[0];
+      if (d[1] == null) d[1] = x.domain()[1];
       return d;
-    }
-  }
-  
-  var COLOR_FIRST = config.color1, COLOR_LAST = config.color2;
-  
-  var rgb = hexToRgb(COLOR_FIRST);
-  
-  var COLOR_START = new Color(rgb.r, rgb.g, rgb.b);
-  
-  rgb = hexToRgb(COLOR_LAST);
-  var COLOR_END = new Color(rgb.r, rgb.g, rgb.b);
-  
-  var MAP_STATE = config.stateDataColumn;
-  var MAP_VALUE = config.valueDataColumn;
-  
-  var width = WIDTH,
-      height = HEIGHT;
-  
-  var valueById = d3.map();
-  
-  var startColors = COLOR_START.getColors(),
-      endColors = COLOR_END.getColors();
-  
-  var colors = [];
-  
-  for (var i = 0; i < COLOR_COUNTS; i++) {
-    var r = Interpolate(startColors.r, endColors.r, COLOR_COUNTS, i);
-    var g = Interpolate(startColors.g, endColors.g, COLOR_COUNTS, i);
-    var b = Interpolate(startColors.b, endColors.b, COLOR_COUNTS, i);
-    colors.push(new Color(r, g, b));
-  }
-  
-  var quantize = d3.scale.quantize()
-      .domain([0, 1.0])
-      .range(d3.range(COLOR_COUNTS).map(function(i) { return i }));
-  
-  var path = d3.geo.path();
-  
-  var svg = d3.select("#canvas-svg").append("svg")
-      .attr("width", width)
-      .attr("height", height);
-  
-  d3.tsv("https://s3-us-west-2.amazonaws.com/vida-public/geo/us-state-names.tsv", function(error, names) {
-  
-  name_id_map = {};
-  id_name_map = {};
-  
-  for (var i = 0; i < names.length; i++) {
-    name_id_map[names[i].name] = names[i].id;
-    id_name_map[names[i].id] = names[i].name;
-  }
-  
-  data.forEach(function(d) {
-    var id = name_id_map[d[MAP_STATE]];
-    valueById.set(id, +d[MAP_VALUE]); 
-  });
-  
-  quantize.domain([d3.min(data, function(d){ return +d[MAP_VALUE] }),
-    d3.max(data, function(d){ return +d[MAP_VALUE] })]);
-  
-  d3.json("https://s3-us-west-2.amazonaws.com/vida-public/geo/us.json", function(error, us) {
-    svg.append("g")
-        .attr("class", "states-choropleth")
-      .selectAll("path")
-        .data(topojson.feature(us, us.objects.states).features)
-      .enter().append("path")
-        .attr("transform", "scale(" + SCALE + ")")
-        .style("fill", function(d) {
-          if (valueById.get(d.id)) {
-            var i = quantize(valueById.get(d.id));
-            var color = colors[i].getColors();
-            return "rgb(" + color.r + "," + color.g +
-                "," + color.b + ")";
+    }))
+  .enter().append("rect")
+    .attr("height", 8)
+    .attr("x", function(d) { return x(d[0]); })
+    .attr("width", function(d) { return x(d[1]) - x(d[0]); })
+    .attr("fill", function(d) { return color(d[0]); });
+
+g.append("text")
+    .attr("class", "caption")
+    .attr("x", x.range()[0])
+    .attr("y", -6)
+    .attr("fill", "#000")
+    .attr("text-anchor", "start")
+    .attr("font-weight", "bold")
+    .text("Unemployment rate");
+
+g.call(d3.axisBottom(x)
+    .tickSize(13)
+    .tickFormat(function(x, i) { return i ? x : x + "%"; })
+    .tickValues(color.domain()))
+  .select(".domain")
+    .remove();
+
+var promises = [
+  d3.json("https://d3js.org/us-10m.v1.json"),
+  d3.tsv("us-state-names.tsv", function(d) {
+    stateNames.set(d.id, d.name)
+  }),
+  d3.tsv("map.tsv", function(d) { 
+    console.log("d in map", d);
+    unemployment.set(d.name, +d.value); 
+  })
+]
+console.log("before promises")
+Promise.all(promises).then(ready)
+
+function ready([us]) {
+  console.log("in ready", topojson.feature(us, us.objects.states).features)
+  console.log("statenames", stateNames)
+  console.log("employment", unemployment)
+  svg.append("g")
+      .attr("class", "counties")
+    .selectAll("path")
+    .data(topojson.feature(us, us.objects.states).features)
+    .enter().append("path")
+      .attr("fill", function(d) { 
+          console.log("d", d)
+          console.log("unemployment", unemployment)
+          var sn = stateNames.get(d.id)
+          console.log("sn",sn)
+          d.rate = unemployment.get(stateNames.get(d.id)) || 0
+          console.log("rate", d.rate)
+          var col =  color(d.rate); 
+          console.log("col", col)
+          if (col) {
+            console.log("found col", col, "for d", d)
+            return col
           } else {
-            return "";
+            return '#ffffff'
           }
-        })
-        .attr("d", path)
-        .on("mousemove", function(d) {
-            var html = "";
-  
-            html += "<div class=\"tooltip_kv\">";
-            html += "<span class=\"tooltip_key\">";
-            html += id_name_map[d.id];
-            html += "</span>";
-            html += "<span class=\"tooltip_value\">";
-            html += (valueById.get(d.id) ? valueFormat(valueById.get(d.id)) : "");
-            html += "";
-            html += "</span>";
-            html += "</div>";
-            
-            $("#tooltip-container").html(html);
-            $(this).attr("fill-opacity", "0.8");
-            $("#tooltip-container").show();
-            
-            var coordinates = d3.mouse(this);
-            
-            var map_width = $('.states-choropleth')[0].getBoundingClientRect().width;
-            
-            if (d3.event.layerX < map_width / 2) {
-              d3.select("#tooltip-container")
-                .style("top", (d3.event.layerY + 15) + "px")
-                .style("left", (d3.event.layerX + 15) + "px");
-            } else {
-              var tooltip_width = $("#tooltip-container").width();
-              d3.select("#tooltip-container")
-                .style("top", (d3.event.layerY + 15) + "px")
-                .style("left", (d3.event.layerX - tooltip_width - 30) + "px");
-            }
-        })
-        .on("mouseout", function() {
-                $(this).attr("fill-opacity", "1.0");
-                $("#tooltip-container").hide();
-            });
-        
-            svg.append("path")
-                .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
-                .attr("class", "states")
-                .attr("transform", "scale(" + SCALE + ")")
-                .attr("d", path);
-        });
-        
-        });
-        });
+      })
+      .attr("d", path)
+    .append("title")
+      .text(function(d) { 
+    			console.log("title", d)
+    			return d.rate + "%"; });
+
+  svg.append("path")
+      .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
+      .attr("class", "states")
+      .attr("d", path);
+}
     }
-    generateUSMap();
+    generateUSMap(population, names);
 })();
