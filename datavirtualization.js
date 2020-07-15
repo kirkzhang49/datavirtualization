@@ -130,7 +130,7 @@ g.call(d3.axisBottom(x)
 
 var promises = [
   d3.json("https://d3js.org/us-10m.v1.json"),
-  d3.tsv("us-state-names.tsv", function(d) {
+  d3.tsv("https://github.com/kirkzhang49/datavirtualization/blob/master/us_map.tsv", function(d) {
     stateNames.set(d.id, d.name)
   }),
   d3.tsv("map.tsv", function(d) { 
@@ -178,5 +178,5 @@ function ready([us]) {
       .attr("d", path);
 }
     }
-    generateUSMap(population, names);
+    generateUSMap();
 })();
