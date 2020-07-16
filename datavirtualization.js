@@ -133,8 +133,8 @@ var promises = [
   d3.tsv("https://raw.githubusercontent.com/kirkzhang49/datavirtualization/master/us_map.tsv", function(d) {
     stateNames.set(d.id, d.name)
   }),
-  d3.csv("https://raw.githubusercontent.com/kirkzhang49/datavirtualization/master/map.tsv", function(d) { 
-    unemployment = d;
+  d3.tsv("https://raw.githubusercontent.com/kirkzhang49/datavirtualization/master/map.tsv", function(d) { 
+    unemployment.set(d.name, +d.value); 
   })
 ]
 Promise.all(promises).then(ready)
