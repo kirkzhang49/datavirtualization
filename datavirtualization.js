@@ -134,33 +134,29 @@ var promises = [
     stateNames.set(d.id, d.name)
   }),
   d3.tsv("https://raw.githubusercontent.com/kirkzhang49/datavirtualization/master/map.tsv", function(d) { 
-    console.log("d in map", d);
     unemployment.set(d.name, +d.value); 
   })
 ]
-console.log("before promises")
 Promise.all(promises).then(ready)
 
 function ready([us]) {
-  console.log("in ready", topojson.feature(us, us.objects.states).features)
-  console.log("statenames", stateNames)
-  console.log("employment", unemployment)
+    console.log(unemployment)
   svg.append("g")
       .attr("class", "counties")
     .selectAll("path")
     .data(topojson.feature(us, us.objects.states).features)
     .enter().append("path")
-      .attr("fill", function(d) { 
-          console.log("d", d)
-          console.log("unemployment", unemployment)
-          var sn = stateNames.get(d.id)
-          console.log("sn",sn)
-          d.rate = unemployment.get(stateNames.get(d.id)) || 0
-          console.log("rate", d.rate)
-          var col =  color(d.rate); 
-          console.log("col", col)
+      .attr("fill", function(d) {
+          let id;
+          if (d.id[0]==0) {
+              id = d.id.substring(1);
+          } else id = d.id;
+          let currentId = '$' + id;
+          var sn = stateNames[currentId]
+          d.rate = unemployment['$'+ sn] || 0
+          console.log(d.rate);
+          var col =  color(d.rate);
           if (col) {
-            console.log("found col", col, "for d", d)
             return col
           } else {
             return '#ffffff'
@@ -169,7 +165,6 @@ function ready([us]) {
       .attr("d", path)
     .append("title")
       .text(function(d) { 
-    			console.log("title", d)
     			return d.rate + "%"; });
 
   svg.append("path")
