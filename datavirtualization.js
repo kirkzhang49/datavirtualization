@@ -3,6 +3,22 @@
     const gdpData = await d3.csv('https://raw.githubusercontent.com/kirkzhang49/datavirtualization/master/gdp_by_state.csv');
     const UnitedStateIncome = incomeData[0];
     const UnitedStateGdb = gdpData[0];
+    // incomeData.forEach((d,index) => {
+    //     console.log(d.State, index);
+    // })
+    gdpData.forEach((d,index) => {
+        console.log(d[''],index);
+    })
+    const NorthDakotaIncome = incomeData[35];
+    const NorthDakotaGdp = gdpData[35];
+    const ColoradoIncome = incomeData[6];
+    const ColoradoGdp = gdpData[6];
+    const IndianaIncome = incomeData[15];
+    const IndianaGdp = gdpData[15];
+    const NewYorkIncome = incomeData[33];
+    const NewYorkGdp = gdpData[33];
+    const CaliforniaIncome = incomeData[5];
+    const CaliforniaGdp = gdpData[5];
     //1997-2015
     const phase = [1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015];
     function generateIncomePhase(data, gdpData) {
@@ -17,11 +33,21 @@
         }
         return result;
     }
-    const USPhase = generateIncomePhase(UnitedStateIncome, UnitedStateGdb);
-
-    function generateBarGraph(data,value,color,xx,yy,texts,labelx,labely) {
-        var svg = d3.select("svg"),
-        width = 600,
+    const USPhase = generateIncomePhase(UnitedStateIncome,UnitedStateGdb);
+    const NorthDakotaPhase = generateIncomePhase(NorthDakotaIncome, NorthDakotaGdp);
+    const ColoradoPhase = generateIncomePhase(ColoradoIncome, ColoradoGdp);
+    const IndianaPhase = generateIncomePhase(IndianaIncome, IndianaGdp);
+    const NewYorkPhase = generateIncomePhase(NewYorkIncome, NewYorkGdp);
+    const CaliforniaPhase = generateIncomePhase(CaliforniaIncome, CaliforniaGdp);
+    const includeStateNames = {
+        'North Dakota': NorthDakotaPhase,
+        'Colorado': ColoradoPhase,
+        'Indiana': IndianaPhase,
+        'New York': NewYorkPhase,
+        'California': CaliforniaPhase
+    };
+    function generateBarGraph(data,value,color,xx,yy,texts,labelx,labely,svg) {
+        var width = 600,
         height = 400;
         var xScale = d3.scaleBand().range([0, width]).padding(0.4),
             yScale = d3.scaleLinear().range([height, 0]);
@@ -78,15 +104,24 @@
     // d3.selectAll(`rect.income`).remove();
     // d3.select('#income-txt').remove();
     function generateUSMap() {
-   var svg = d3.select("svg"),
-    width = +svg.attr("width"),
+                var svg = d3.select("body").append("svg").attr('width',1500).attr('height', 800);
+   var width = +svg.attr("width"),
     height = +svg.attr("height");
 
 var unemployment = d3.map();
 var stateNames = d3.map();
 
-var path = d3.geoPath();
-
+    function processId(d, value) {
+        let id;
+        if (d.id[0]==0) {
+            id = d.id.substring(1);
+        } else id = d.id;
+        let currentId = '$' + id;
+        var sn = stateNames[currentId];
+        if (includeStateNames[sn]) {
+            return value;
+        }
+    }
 var x = d3.scaleLinear()
     .domain([1, 10])
     .rangeRound([600, 860]);
@@ -140,9 +175,11 @@ var promises = [
 Promise.all(promises).then(ready)
 
 function ready([us]) {
-    console.log(unemployment)
+    var path = d3.geoPath();
+
   svg.append("g")
-      .attr("class", "counties")
+  .attr("transform", "translate(200,50)")
+    .attr("class", "counties")
     .selectAll("path")
     .data(topojson.feature(us, us.objects.states).features)
     .enter().append("path")
@@ -152,9 +189,8 @@ function ready([us]) {
               id = d.id.substring(1);
           } else id = d.id;
           let currentId = '$' + id;
-          var sn = stateNames[currentId]
+          var sn = stateNames[currentId];
           d.rate = unemployment['$'+ sn] || 0
-          console.log(d.rate);
           var col =  color(d.rate);
           if (col) {
             return col
@@ -163,15 +199,44 @@ function ready([us]) {
           }
       })
       .attr("d", path)
-    .append("title")
+      .on('click', (d) => {
+            let id;
+            if (d.id[0]==0) {
+                id = d.id.substring(1);
+            } else id = d.id;
+            let currentId = '$' + id;
+            var sn = stateNames[currentId];
+            if (includeStateNames[sn]) {
+                console.log(sn);
+                d3.selectAll("svg").remove();
+                initBarGraph(includeStateNames[sn]);
+            }
+      })
+      .style('stroke-width', (d)=> {
+          return processId(d,5);
+      })
+      .style('stroke', (d)=> {
+         return processId(d,'fuchsia');
+      })
+      .append("title")
       .text(function(d) { 
     			return d.rate + "%"; });
 
-  svg.append("path")
+  svg.append("path").attr("transform", "translate(200,50)")
       .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
       .attr("class", "states")
-      .attr("d", path);
+      .attr("d", path)
 }
     }
     generateUSMap();
+
+        // d3.selectAll(`rect.income`).remove();
+    // d3.selectAll('path').remove();
+// d3.selectAll("svg").remove();
+    function initBarGraph(state) {
+    var svginit = d3.select("body").append("svg").attr('width',1500).attr('height', 800);
+    generateBarGraph(state,'income', '#69b3a2',100,120,'Medium Income chart', 230,20, svginit);
+    generateBarGraph(state,'gdp', 'steelblue',800,120, 'GDP Per Person', 990,20, svginit);
+    }
+
 })();
