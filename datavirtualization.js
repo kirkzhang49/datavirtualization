@@ -8,6 +8,8 @@
     for (let population of populationState) {
         populationDict[population['state_or_territory']] = population['census_population_april_1_2010_number'];
     }
+       let constState, constStateName,constateRate,type='vsGraph';
+
     const NorthDakotaIncome = incomeData[35];
     const NorthDakotaGdp = gdpData[35];
     const ColoradoIncome = incomeData[6];
@@ -68,10 +70,12 @@
             .attr("text-anchor", "end")
             .attr("stroke", "black")
             .text("Year");
-
+            let txtD = type === 'vsGraph' ? 'Dollars' : '%';
             g.append("g")
             .call(d3.axisLeft(yScale).tickFormat(function(d){
+                if (type==='vsGraph')
                 return "$" + d;
+                else return d + ' %'
             }).ticks(10))
             .append("text")
             .attr('id', `${value}-y`)
@@ -79,7 +83,7 @@
             .attr("dy", "0.71em")
             .attr("text-anchor", "end")
             .attr("stroke", "black")
-            .text("value").text("Dollars");
+            .text("value").text(txtD);
 
              svg.append("text")
             .attr('id', `${value}-txt`)
@@ -98,9 +102,11 @@
          .attr("y", function(d) { return yScale(d[value]); })
          .attr("height", function(d) { return height - yScale(d[value]); })
            .on('mousemove', function(d){
+            
             var html = "";
             let toolTxt = value == 'income' ? 'gdp' : 'income';
             let toolValue = value == 'income' ? d.gdp : d.income;
+            if (type === 'vsGraph') {
             html += "<div class=\"tooltip_kv\">";
             html += "<span class=\"tooltip_key\">";
             html += `gdp/inc(${d.year}):`
@@ -111,7 +117,19 @@
             html += "</span>" + '<br/>';
             html += `<span>${toolTxt}: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$${toolValue}</span>`;
             html += "</div>";
-                
+            } else {
+            html += "<div class=\"tooltip_kv\">";
+            html += "<span class=\"tooltip_key\">";
+            html += `gdp/inc(${d.year}):`
+            html += "</span>";
+            html += "<span class=\"tooltip_value\">";
+            html += ` ${d.rate}%`
+            html += "";
+            html += "</span>" + '<br/>';
+            html += `<span>$Incomes: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$${d.income}</span><br/>`;
+            html += `<span>$Gdp: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$${d.gdp}</span>`;
+            html += "</div>";
+            }
             $("#tooltip-container").html(html);
             $(this).attr("fill-opacity", "0.8");
             $("#tooltip-container").show();
@@ -301,11 +319,11 @@ function ready([us]) {
         // d3.selectAll(`rect.income`).remove();
     // d3.selectAll('path').remove();
 // d3.selectAll("svg").remove();
-    function initBarGraph(state, stateName, rate) {
-        $('.homeBTN').css('display', 'block');
+function generateSubSence(state, stateName, rate,svginit) {
+         $('.homeBTN').css('display', 'block');
+         $('.switchBTN').css('display', 'block');
         $("#tooltip-container").css('display', 'none');
         $('.textAnnotation').css('display','none');
-    var svginit = d3.select("body").append("svg").attr('width',1800).attr('height', 1000);
             svginit.append("text")
             .attr("transform", `translate(700,30)`)
             .attr("x", 50)
@@ -334,16 +352,34 @@ function ready([us]) {
             .attr('font-weight','bold')
             .attr("font-size", "28px")
             .text(`State Population: ${statePopulation}, Unemployment Rate: ${rate}%`);
-    generateBarGraph(state,'income', '#69b3a2',400,200,'Medium Income chart', 230,120, svginit);
-    generateBarGraph(state,'gdp', 'steelblue',1100,200, 'GDP Per Person', 990,120, svginit);
+}
+    function initBarGraph(state, stateName, rate) {
+        constState=state;
+        constStateName=stateName;
+        constateRate=rate;
+    var svginit = d3.select("body").append("svg").attr('width',1800).attr('height', 1000);
+        generateSubSence(state, stateName, rate,svginit);
+        if (type==='vsGraph') {
+            generateBarGraph(state,'income', '#69b3a2',400,200,'Medium Income chart', 230,120, svginit);
+            generateBarGraph(state,'gdp', 'steelblue',1100,200, 'GDP Per Person', 990,120, svginit);
+        } else {
+            generateBarGraph(state,'rate', '#ffae00',720,200,'GDP/inc Ratio', 610,120, svginit);
+        }
     }
     function backMap() {
         d3.selectAll("svg").remove();
         $('.homeBTN').css('display', 'none');
+        $('.switchBTN').css('display', 'none');
         $('.textAnnotation').css('display','block');
         generateUSMap();
     }
+    function switchGraph() {
+        d3.selectAll("svg").remove();
+        type = type ==='vsGraph' ? 'ratioGraph' : 'vsGraph';
+        initBarGraph(constState,constStateName,constateRate);
+    }
     $('.homeBTN').click(backMap);
+    $('.switchBTN').click(switchGraph);
         generateUSMap();
 
 })();
