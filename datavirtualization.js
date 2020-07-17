@@ -9,7 +9,7 @@
         populationDict[population['state_or_territory']] = population['census_population_april_1_2010_number'];
     }
        let constState, constStateName,constateRate,type='vsGraph';
-
+       let startYear = 1997,endYear = 2015;
     const NorthDakotaIncome = incomeData[35];
     const NorthDakotaGdp = gdpData[35];
     const ColoradoIncome = incomeData[6];
@@ -55,7 +55,7 @@
         height = 400;
         var xScale = d3.scaleBand().range([0, width]).padding(0.4),
             yScale = d3.scaleLinear().range([height, 0]);
-
+            console.log(data);
         var g = svg.append("g")
             .attr("transform", "translate(" + xx + "," + yy + ")");
             xScale.domain(data.map((d)=>d.year));
@@ -322,6 +322,7 @@ function ready([us]) {
 function generateSubSence(state, stateName, rate,svginit) {
          $('.homeBTN').css('display', 'block');
          $('.switchBTN').css('display', 'block');
+        $('.inputField').css('display', 'block');
         $("#tooltip-container").css('display', 'none');
         $('.textAnnotation').css('display','none');
             svginit.append("text")
@@ -354,10 +355,12 @@ function generateSubSence(state, stateName, rate,svginit) {
             .text(`State Population: ${statePopulation}, Unemployment Rate: ${rate}%`);
 }
     function initBarGraph(state, stateName, rate) {
+        state = includeStateNames[stateName].slice(startYear-1997,endYear-1997+1);
+        console.log(state);
         constState=state;
         constStateName=stateName;
         constateRate=rate;
-    var svginit = d3.select("body").append("svg").attr('width',1800).attr('height', 1000);
+    var svginit = d3.select("body").append("svg").attr('width',1800).attr('height', 1100);
         generateSubSence(state, stateName, rate,svginit);
         if (type==='vsGraph') {
             generateBarGraph(state,'income', '#69b3a2',400,200,'Medium Income chart', 230,120, svginit);
@@ -369,6 +372,7 @@ function generateSubSence(state, stateName, rate,svginit) {
     function backMap() {
         d3.selectAll("svg").remove();
         $('.homeBTN').css('display', 'none');
+        $('.inputField').css('display', 'none');
         $('.switchBTN').css('display', 'none');
         $('.textAnnotation').css('display','block');
         generateUSMap();
@@ -387,6 +391,22 @@ function generateSubSence(state, stateName, rate,svginit) {
     }
     $('.homeBTN').click(backMap);
     $('.switchBTN').click(switchGraph);
+    $('#startYear').change(() => {
+        startYear = $('#startYear').val();
+    });
+    $('#endYear').change(() => {
+        endYear = $('#endYear').val();
+    });
+    $('#changeYear').click(() => {
+        console.log(startYear,endYear);
+        if (startYear<1997||startYear>2015||endYear<1997||endYear>2015) {
+            alert('the year enter muster between 1997 to 2015');
+        }
+        else {
+            d3.selectAll("svg").remove();
+            initBarGraph(constState,constStateName,constateRate);
+        }
+    });
         generateUSMap();
 
 })();
