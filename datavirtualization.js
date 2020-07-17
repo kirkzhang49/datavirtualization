@@ -376,6 +376,13 @@ function generateSubSence(state, stateName, rate,svginit) {
     function switchGraph() {
         d3.selectAll("svg").remove();
         type = type ==='vsGraph' ? 'ratioGraph' : 'vsGraph';
+        if (type === 'vsGraph') {
+            $('.switchBTN').text('Switch to Ratio Chart');
+            $('.switchBTN').css('color','#ffae00');
+        } else {
+            $('.switchBTN').text('Switch to VS Chart');
+             $('.switchBTN').css('color','steelblue');
+        }
         initBarGraph(constState,constStateName,constateRate);
     }
     $('.homeBTN').click(backMap);
