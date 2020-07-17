@@ -3,12 +3,11 @@
     const gdpData = await d3.csv('https://raw.githubusercontent.com/kirkzhang49/datavirtualization/master/gdp_by_state.csv');
     const UnitedStateIncome = incomeData[0];
     const UnitedStateGdb = gdpData[0];
-    // incomeData.forEach((d,index) => {
-    //     console.log(d.State, index);
-    // })
-    gdpData.forEach((d,index) => {
-        console.log(d[''],index);
-    })
+    const populationState = await d3.csv('https://raw.githubusercontent.com/kirkzhang49/datavirtualization/master/population.csv');
+    const populationDict = {};
+    for (let population of populationState) {
+        populationDict[population['state_or_territory']] = population['census_population_april_1_2010_number'];
+    }
     const NorthDakotaIncome = incomeData[35];
     const NorthDakotaGdp = gdpData[35];
     const ColoradoIncome = incomeData[6];
@@ -25,10 +24,13 @@
         const result = new Array(phase.length);
         for (let i=0;i<phase.length;i++) {
             // if (!result['phase']) result['phase'] = new Array(phase.length);
+            let income0 = (Number(data[phase[i]].split(',').join('')) / 1.852).toFixed(2);
+            let gdp0 = Number(gdpData[phase[i]].split(',').join(''));
             result[i] = {
                 'year': phase[i],
-                'income':  Number(data[phase[i]].split(',').join('')) / 1.852,
-                'gdp': Number(gdpData[phase[i]].split(',').join('')),
+                'income': income0,
+                'gdp': gdp0,
+                'rate': ((gdp0/income0)*100).toFixed(2)
             }
         }
         return result;
@@ -95,18 +97,51 @@
          .attr("x", function(d) { return xScale(d.year); })
          .attr("y", function(d) { return yScale(d[value]); })
          .attr("height", function(d) { return height - yScale(d[value]); })
+           .on('mousemove', function(d){
+            var html = "";
+            let toolTxt = value == 'income' ? 'gdp' : 'income';
+            let toolValue = value == 'income' ? d.gdp : d.income;
+            html += "<div class=\"tooltip_kv\">";
+            html += "<span class=\"tooltip_key\">";
+            html += `gdp/inc(${d.year}):`
+            html += "</span>";
+            html += "<span class=\"tooltip_value\">";
+            html += ` ${d.rate}%`
+            html += "";
+            html += "</span>" + '<br/>';
+            html += `<span>${toolTxt}: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$${toolValue}</span>`;
+            html += "</div>";
+                
+            $("#tooltip-container").html(html);
+            $(this).attr("fill-opacity", "0.8");
+            $("#tooltip-container").show();
+              var tooltip_width = $("#tooltip-container").width();
+              d3.select("#tooltip-container")
+                .style("top", (d3.event.layerY + 15) + "px")
+                .style("left", (d3.event.layerX - tooltip_width - 30) + "px");
+
+            
+      })
+      .on('mouseout', function(){
+        $(this).attr("fill-opacity", "1");
+        $("#tooltip-container").hide();
+      })
          .transition()
          .duration(1200)
          .attr("width", xScale.bandwidth())
     }
-    // generateBarGraph(USPhase,'income', '#69b3a2',100,120,'Medium Income chart', 230,20);
-    // generateBarGraph(USPhase,'gdp', 'steelblue',800,120, 'GDP Per Person', 990,20);
-    // d3.selectAll(`rect.income`).remove();
-    // d3.select('#income-txt').remove();
+
     function generateUSMap() {
                 var svg = d3.select("body").append("svg").attr('width',1500).attr('height', 800);
    var width = +svg.attr("width"),
     height = +svg.attr("height");
+
+             svg.append("text")
+            .attr("transform", `translate(1000,50)`)
+            .attr("x", 50)
+            .attr("y", 50)
+            .attr("font-size", "24px")
+            .text('US Unemployment Rate Map');
 
 var unemployment = d3.map();
 var stateNames = d3.map();
@@ -178,8 +213,8 @@ function ready([us]) {
     var path = d3.geoPath();
 
   svg.append("g")
-  .attr("transform", "translate(200,50)")
-    .attr("class", "counties")
+  .attr("transform", "translate(400,100)")
+    .attr("class", "states-choropleth")
     .selectAll("path")
     .data(topojson.feature(us, us.objects.states).features)
     .enter().append("path")
@@ -207,9 +242,8 @@ function ready([us]) {
             let currentId = '$' + id;
             var sn = stateNames[currentId];
             if (includeStateNames[sn]) {
-                console.log(sn);
                 d3.selectAll("svg").remove();
-                initBarGraph(includeStateNames[sn]);
+                initBarGraph(includeStateNames[sn], sn, d.rate);
             }
       })
       .style('stroke-width', (d)=> {
@@ -218,25 +252,98 @@ function ready([us]) {
       .style('stroke', (d)=> {
          return processId(d,'fuchsia');
       })
-      .append("title")
-      .text(function(d) { 
-    			return d.rate + "%"; });
+      .on('mousemove', function(d){
+                      let id;
+            if (d.id[0]==0) {
+                id = d.id.substring(1);
+            } else id = d.id;
+            let currentId = '$' + id;
+            var sn = stateNames[currentId];
+            var populationState = populationDict[sn];
+            var html = "";
+  
+            html += "<div class=\"tooltip_kv\">";
+            html += "<span class=\"tooltip_key\">";
+            html += sn
+            html += "</span>";
+            html += "<span class=\"tooltip_value\">";
+            html += ` ${d.rate}%`
+            html += "";
+            html += "</span>" + '<br/>';
+            html += `<span>Population:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${populationState}</span>`
+            html += "</div>";
+                
+            $("#tooltip-container").html(html);
+            $(this).attr("fill-opacity", "0.8");
+            $("#tooltip-container").show();
+            var map_width = $('.states-choropleth')[0].getBoundingClientRect().width;
 
-  svg.append("path").attr("transform", "translate(200,50)")
+              var tooltip_width = $("#tooltip-container").width();
+              d3.select("#tooltip-container")
+                .style("top", (d3.event.layerY + 15) + "px")
+                .style("left", (d3.event.layerX - tooltip_width - 30) + "px");
+
+            
+      })
+      .on('mouseout', function(){
+        $(this).attr("fill-opacity", "1");
+        $("#tooltip-container").hide();
+      })
+
+
+  svg.append("path").attr("transform", "translate(400,100)")
       .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
       .attr("class", "states")
       .attr("d", path)
 }
     }
-    generateUSMap();
 
         // d3.selectAll(`rect.income`).remove();
     // d3.selectAll('path').remove();
 // d3.selectAll("svg").remove();
-    function initBarGraph(state) {
-    var svginit = d3.select("body").append("svg").attr('width',1500).attr('height', 800);
-    generateBarGraph(state,'income', '#69b3a2',100,120,'Medium Income chart', 230,20, svginit);
-    generateBarGraph(state,'gdp', 'steelblue',800,120, 'GDP Per Person', 990,20, svginit);
+    function initBarGraph(state, stateName, rate) {
+        $('.homeBTN').css('display', 'block');
+        $("#tooltip-container").css('display', 'none');
+        $('.textAnnotation').css('display','none');
+    var svginit = d3.select("body").append("svg").attr('width',1800).attr('height', 1000);
+            svginit.append("text")
+            .attr("transform", `translate(700,30)`)
+            .attr("x", 50)
+            .attr("y", 50)
+            .attr('fill', 'olive')
+            .attr("font-size", "30px")
+            .text(`${stateName} Medium income vs GDP Rate`);
+    let statePopulation = populationDict[stateName];
+    const avgIncome = (state.reduce((a,c)=>a+Number(c.income),0)/state.length).toFixed(2);
+    const avgGdp = (state.reduce((a,c)=>a+Number(c.gdp),0)/state.length).toFixed(2);
+    const ratio = (avgGdp/avgIncome).toFixed(2);
+        svginit.append("text")
+        .attr("transform", `translate(540,760)`)
+        .attr("x", 50)
+        .attr("y", 50)
+        .attr('fill', 'black')
+        .attr('font-weight','bold')
+        .attr("font-size", "28px")
+        .text(`Avg Income: ${avgIncome}, Avg Gdp: ${avgGdp}, avg ratio:${ratio}`);
+
+        svginit.append("text")
+            .attr("transform", `translate(550,690)`)
+            .attr("x", 50)
+            .attr("y", 50)
+            .attr('fill', 'black')
+            .attr('font-weight','bold')
+            .attr("font-size", "28px")
+            .text(`State Population: ${statePopulation}, Unemployment Rate: ${rate}%`);
+    generateBarGraph(state,'income', '#69b3a2',400,200,'Medium Income chart', 230,120, svginit);
+    generateBarGraph(state,'gdp', 'steelblue',1100,200, 'GDP Per Person', 990,120, svginit);
     }
+    function backMap() {
+        d3.selectAll("svg").remove();
+        $('.homeBTN').css('display', 'none');
+        $('.textAnnotation').css('display','block');
+        generateUSMap();
+    }
+    $('.homeBTN').click(backMap);
+        generateUSMap();
 
 })();
