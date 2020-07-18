@@ -321,6 +321,7 @@ function ready([us]) {
 // d3.selectAll("svg").remove();
 function generateSubSence(state, stateName, rate,svginit) {
          $('.homeBTN').css('display', 'block');
+         $('.textHint').css('display', 'block');
          $('.switchBTN').css('display', 'block');
         $('.inputField').css('display', 'block');
         $("#tooltip-container").css('display', 'none');
@@ -372,6 +373,7 @@ function generateSubSence(state, stateName, rate,svginit) {
     function backMap() {
         d3.selectAll("svg").remove();
         $('.homeBTN').css('display', 'none');
+        $('.textHint').css('display', 'none');
         $('.inputField').css('display', 'none');
         $('.switchBTN').css('display', 'none');
         $('.textAnnotation').css('display','block');
@@ -398,7 +400,6 @@ function generateSubSence(state, stateName, rate,svginit) {
         endYear = $('#endYear').val();
     });
     $('#changeYear').click(() => {
-        console.log(startYear,endYear);
         if (startYear<1997||startYear>2015||endYear<1997||endYear>2015) {
             alert('the year enter muster between 1997 to 2015');
         }

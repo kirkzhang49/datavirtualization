@@ -13,6 +13,9 @@
     rate number and some more detail. For the state with <span style="color:fuchsia">pink border</span> You can click and see more
     detail on its medium income vs gdp per person.
 </p>
+<p class="textHint">Hint: With this scense You can enter the start and end years between 1997 to 2015 to regenerate the graph.
+    Also, you can click Switch to button to switch bar graph between Income vs GDP and the ratio graph.
+</p>
 <div id="tooltip-container"></div>
 <div class='inputField'>
     <input id="startYear" type="text" placeholder="Enter start year" style="height:35px;">
@@ -20,6 +23,18 @@
     <button id="changeYear" style="backgroud-color:steelblue; margin-left:40px">Submit</button>
 </div>
 <style>
+.textHint {
+    font-size:18px;
+    font-weight: 500;
+    position: absolute;
+    width: 320px;
+    margin-left: 180px;
+    margin-top: 840px;
+    border: solid grey 1px;
+    padding: 15px;
+    color: olive;
+    display: none;
+}
 .inputField {
     position: absolute;
     margin-left: 740px;
