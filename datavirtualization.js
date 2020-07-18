@@ -10,16 +10,22 @@
     }
        let constState, constStateName,constateRate,type='vsGraph';
        let startYear = 1997,endYear = 2015;
-    const NorthDakotaIncome = incomeData[35];
-    const NorthDakotaGdp = gdpData[35];
+    incomeData.forEach((d,index)=>console.log(d.State,index));
+    const AlabamaIncome = incomeData[1];
+    const AlabamaGdp = gdpData[1];
+    const AlaskaIncome = incomeData[2];
+    const AlaskaGdp = gdpData[2];
+    const CaliforniaIncome = incomeData[5];
+    const CaliforniaGdp = gdpData[5];
     const ColoradoIncome = incomeData[6];
     const ColoradoGdp = gdpData[6];
     const IndianaIncome = incomeData[15];
     const IndianaGdp = gdpData[15];
     const NewYorkIncome = incomeData[33];
     const NewYorkGdp = gdpData[33];
-    const CaliforniaIncome = incomeData[5];
-    const CaliforniaGdp = gdpData[5];
+    const NorthDakotaIncome = incomeData[35];
+    const NorthDakotaGdp = gdpData[35];
+
     //1997-2015
     const phase = [1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015];
     function generateIncomePhase(data, gdpData) {
@@ -38,24 +44,115 @@
         return result;
     }
     const USPhase = generateIncomePhase(UnitedStateIncome,UnitedStateGdb);
+    const AlabamaPhase = generateIncomePhase(AlabamaIncome,AlabamaGdp)
+    const Arizona = generateIncomePhase(incomeData[3], gdpData[3]);
+    const Arkansas = generateIncomePhase(incomeData[4], gdpData[4]);
+    const CaliforniaPhase = generateIncomePhase(CaliforniaIncome, CaliforniaGdp);
+    const Connecticut = generateIncomePhase(incomeData[7], gdpData[7]);
+    const Delaware = generateIncomePhase(incomeData[8], gdpData[8]);
+    const DC = generateIncomePhase(incomeData[9], gdpData[9]);
+    const Florida = generateIncomePhase(incomeData[10], gdpData[10]);
+    const Georgia = generateIncomePhase(incomeData[11], gdpData[11]);
+    const Hawaii = generateIncomePhase(incomeData[12], gdpData[12]);
+    const Idaho = generateIncomePhase(incomeData[13], gdpData[13]);
+    const Illinois = generateIncomePhase(incomeData[14], gdpData[14]);
+    const Iowa = generateIncomePhase(incomeData[16], gdpData[16]);
+    const Kansas = generateIncomePhase(incomeData[17], gdpData[17]);
+    const Kentucky = generateIncomePhase(incomeData[18], gdpData[18]);
+    const Louisiana = generateIncomePhase(incomeData[19], gdpData[19]);
+    const Maine = generateIncomePhase(incomeData[20], gdpData[20]);
+    const Maryland = generateIncomePhase(incomeData[21], gdpData[21]);
+    const Massachusetts = generateIncomePhase(incomeData[22], gdpData[22]);
+    const Michigan = generateIncomePhase(incomeData[23], gdpData[23]);
+    const Minnesota = generateIncomePhase(incomeData[24], gdpData[24]);
+    const Mississippi = generateIncomePhase(incomeData[25], gdpData[25]);
+    const Missouri = generateIncomePhase(incomeData[26], gdpData[26]);
+    const Montana = generateIncomePhase(incomeData[27], gdpData[27]);
+    const Nebraska = generateIncomePhase(incomeData[28], gdpData[28]);
+    const Nevada = generateIncomePhase(incomeData[29], gdpData[29]);
+    const NewHampshire = generateIncomePhase(incomeData[30], gdpData[30]);
+    const NewJersey = generateIncomePhase(incomeData[31], gdpData[31]);
+    const NewMexico = generateIncomePhase(incomeData[32], gdpData[32]);
+    const NorthCarolina  = generateIncomePhase(incomeData[34], gdpData[34]);
+    const Ohio = generateIncomePhase(incomeData[36], gdpData[36]);
+    const Oklahoma = generateIncomePhase(incomeData[37], gdpData[37]);
+    const Oregon = generateIncomePhase(incomeData[38], gdpData[38]);
+    const Pennsylvania = generateIncomePhase(incomeData[39], gdpData[39]);
+    const RhodeIsland = generateIncomePhase(incomeData[40], gdpData[40]);
+    const SouthCarolina = generateIncomePhase(incomeData[41], gdpData[41]);
+    const SouthDakota = generateIncomePhase(incomeData[42], gdpData[42]);
+    const Tennessee = generateIncomePhase(incomeData[43], gdpData[43]);
+    const Texas = generateIncomePhase(incomeData[44], gdpData[44]);
+    const Utah = generateIncomePhase(incomeData[45], gdpData[45]);
+    const Vermont = generateIncomePhase(incomeData[46], gdpData[46]);
+    const Virginia = generateIncomePhase(incomeData[47], gdpData[47]);
+    const Washington = generateIncomePhase(incomeData[48], gdpData[48]);
+    const WestVirginia = generateIncomePhase(incomeData[49], gdpData[49]);
+    const Wisconsin = generateIncomePhase(incomeData[50], gdpData[50]);
+    const Wyoming = generateIncomePhase(incomeData[51], gdpData[51]);
+    const AlaskaPhase = generateIncomePhase(AlaskaIncome,AlaskaGdp);
     const NorthDakotaPhase = generateIncomePhase(NorthDakotaIncome, NorthDakotaGdp);
     const ColoradoPhase = generateIncomePhase(ColoradoIncome, ColoradoGdp);
     const IndianaPhase = generateIncomePhase(IndianaIncome, IndianaGdp);
     const NewYorkPhase = generateIncomePhase(NewYorkIncome, NewYorkGdp);
-    const CaliforniaPhase = generateIncomePhase(CaliforniaIncome, CaliforniaGdp);
     const includeStateNames = {
-        'North Dakota': NorthDakotaPhase,
+        'Alabama': AlabamaPhase,
+        'Alaska': AlaskaPhase,
+        'Iowa': Iowa,
+        'Wyoming': Wyoming,
+        'Wisconsin': Wisconsin,
+        'West Virginia': WestVirginia,
+        'Washington': Washington,
+        'Virginia':Virginia,
+        'Ohio':Ohio,
+        'Vermont': Vermont,
+        'Utah':Utah,
+        'Texas': Texas,
+        'Tennessee': Tennessee,
+        'South Dakota':SouthDakota,
+        'South Carolina':SouthCarolina,
+        'Rhode Island': RhodeIsland,
+        'Pennsylvania': Pennsylvania,
+        'Oregon':Oregon,
+        'Oklahoma': Oklahoma,
+        'North Carolina':NorthCarolina,
+        'New Mexico':NewMexico,
+        'New Jersey':NewJersey,
+        'New Hampshire':NewHampshire,
+        'Nevada': Nevada,
+        'Nebraska': Nebraska,
+        'Montana': Montana,
+        'Missouri': Missouri,
+        'Mississippi': Mississippi,
+        'Maryland': Maryland,
+        'Minnesota': Minnesota,
+        'Michigan': Michigan,
+        'Massachusetts': Massachusetts,
+        'Maine': Maine,
+        'Louisiana': Louisiana,
+        'Kentucky': Kentucky,
+        'Kansas': Kansas,
+        'Arizona': Arizona,
+        'Illinois': Illinois,
+        'Idaho':Idaho,
+        'Arkansas': Arkansas,
+        'California': CaliforniaPhase,
+        'Connecticut':Connecticut,
         'Colorado': ColoradoPhase,
+        'Delaware': Delaware,
+        'D.C.': DC,
+        'Florida': Florida,
+        'Georgia': Georgia,
+        'Hawaii': Hawaii,
+        'North Dakota': NorthDakotaPhase,
         'Indiana': IndianaPhase,
         'New York': NewYorkPhase,
-        'California': CaliforniaPhase
     };
     function generateBarGraph(data,value,color,xx,yy,texts,labelx,labely,svg) {
         var width = 600,
         height = 400;
         var xScale = d3.scaleBand().range([0, width]).padding(0.4),
             yScale = d3.scaleLinear().range([height, 0]);
-            console.log(data);
         var g = svg.append("g")
             .attr("transform", "translate(" + xx + "," + yy + ")");
             xScale.domain(data.map((d)=>d.year));
@@ -357,7 +454,6 @@ function generateSubSence(state, stateName, rate,svginit) {
 }
     function initBarGraph(state, stateName, rate) {
         state = includeStateNames[stateName].slice(startYear-1997,endYear-1997+1);
-        console.log(state);
         constState=state;
         constStateName=stateName;
         constateRate=rate;
